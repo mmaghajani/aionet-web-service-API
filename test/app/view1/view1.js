@@ -1,14 +1,16 @@
 'use strict';
 var app = angular.module('view1', ['angular-md5', "ngSanitize"]);
 var url = "";
-app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
+var platformInformation = "" ;
+app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
 
     var digest = md5.createHash("95d58639-24c0-4b72-80a5-e124f41d7af95.4json7743461522282941752client/getPlatformInformation111fa-IR");
     $http.get("https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" +
         digest + "/client/getPlatformInformation?" +
         "locale=fa-IR&appVersion=1&deviceWidth=1&deviceHeight=1")
         .then(function (response) {
-            $scope.platformInformation = response.data;
+            platformInformation = response.data ;
+            $scope.platformInformation = platformInformation;
         });
 
     digest = md5.createHash("95d58639-24c0-4b72-80a5-e124f41d7af95.4json7743461522282941752client/channels/listMPEG2fa-IR_2DHLSTV");
@@ -73,15 +75,18 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
                     digest = md5.createHash("95d58639-24c0-4b72-80a5-e124f41d7af95.4json7743461522282941752client/ping"
                         + '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
                         + sessionID.toString() + '}');
-                    $http({
-                        url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
-                        data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
-                        + sessionID.toString() + '}' ,
-                        method: "POST",
-                        headers: {"Content-Type": "application/json"}
-                    }).then(function (response) {
-                        $scope.ping = response.data;
-                    });
+                    $interval(function () {
+                        $http({
+                            url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
+                            data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
+                            + sessionID.toString() + '}' ,
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"}
+                        }).then(function (response) {
+                            $scope.ping = response.data;
+                        });
+                    }, platformInformation.pingRepeatTo );
+
 
                 });
             });
