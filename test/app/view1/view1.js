@@ -1,20 +1,6 @@
 'use strict';
 var app = angular.module('view1', ['angular-md5', "ngSanitize"]);
-//
-// "com.2fdevs.videogular",
-//     "com.2fdevs.videogular.plugins.controls",
-//     "com.2fdevs.videogular.plugins.overlayplay",
-//     "com.2fdevs.videogular.plugins.poster"
 var url = "";
-
-// function loadStream() {
-//     var $vid_obj = videojs("example_video_1");
-//     $vid_obj.src(url.url);
-//     $vid_obj.on('loadstart',function(){
-//         $vid_obj.play();
-//     });
-// }
-
 app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
 
     var digest = md5.createHash("95d58639-24c0-4b72-80a5-e124f41d7af95.4json7743461522282941752client/getPlatformInformation111fa-IR");
@@ -72,12 +58,12 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
                     url = response.data;
                     $scope.url = url;
                     var player = videojs('video');
-                    player.on('pause', function() {
+                    player.on('pause', function () {
                         player.bigPlayButton.show();
 
                         // Now the issue is that we need to hide it again if we start playing
                         // So every time we do this, we can create a one-time listener for play events.
-                        player.on('play', function() {
+                        player.on('play', function () {
                             player.bigPlayButton.hide();
                         });
                     });
@@ -88,40 +74,5 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
             });
 
     });
-
-
-    // videojs("example_video_1",  { "controls": true, "autoplay": false, "preload": "auto" } , function(){
-    //     var myPlayer = videojs('example_video_1');
-    //     myPlayer.src({"type":"video/mp4", "src":"http://solutions.brightcove.com/bcls/assets/videos/Bird_Titmouse.mp4"});
-    //     myPlayer.play() ;
-    // });
-
-    // $scope.mediaToggle = {
-    //     sources: [
-    //         {
-    //             src: 'images/happyfit2.mp4',
-    //             type: 'video/mp4'
-    //         },
-    //         {
-    //             src: 'images/happyfit2.webm',
-    //             type: 'video/webm'
-    //         }
-    //     ],
-    //     tracks: [
-    //         {
-    //             kind: 'subtitles',
-    //             label: 'English subtitles',
-    //             src: 'assets/subtitles.vtt',
-    //             srclang: 'en',
-    //             default: true
-    //         }
-    //     ],
-    //     poster: 'images/screen.jpg'
-    // };
-    //
-    // //listen for when the vjs-media object changes
-    // $scope.$on('vjsVideoMediaChanged', function (e, data) {
-    //     console.log('vjsVideoMediaChanged event was fired');
-    // });
 });
 
