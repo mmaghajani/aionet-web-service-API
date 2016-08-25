@@ -70,6 +70,16 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $sce) {
                     player.src({"type": "application/x-mpegURL", "src": url.url, "withCredentials": "true"});
                     player.play();
 
+                    digest = md5.createHash("95d58639-24c0-4b72-80a5-e124f41d7af95.4json7743461522282941752client/ping" + '{"username":"989378733393" , "password":"85491374" , "deviceName":"Linux-Chrome" , "locale":"fa-IR"}');
+                    $http({
+                        url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
+                        data: '{"username":"989378733393" , "password":"85491374" , "deviceName":"Linux-Chrome" , "locale":"fa-IR"}',
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"}
+                    }).then(function (response) {
+                        $scope.ping = response.data ;
+                    });
+
                 });
             });
 
