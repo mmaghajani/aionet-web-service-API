@@ -46,7 +46,7 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                 $scope.profiles = profiles;
 
                 var profileGuid = ((profiles.profiles)[0]).guid
-                digest = createDigest("channels/linear/getUrl" , '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
                     ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
                     + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
                 $http({
@@ -61,19 +61,45 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                     url = response.data;
                     $scope.url = url;
                     var player = videojs('video');
-                    player.on('pause', function () {
-                        player.bigPlayButton.show();
-
-                        // Now the issue is that we need to hide it again if we start playing
-                        // So every time we do this, we can create a one-time listener for play events.
-                        player.on('play', function () {
-                            player.bigPlayButton.hide();
-                        });
-                    });
                     player.src({"type": "application/x-mpegURL", "src": url.url, "withCredentials": "true"});
                     player.play();
 
-                    digest = createDigest("ping" , '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
+                    player.on('pause', function () {
+                        player.bigPlayButton.show();
+                        var s = '{ "contentId": 8 , "type":"TV" , "locale":"fa-IR" ' +
+                            ', "profileGuid" : "' + profileGuid + '" , "sessionId" : "' + sessionID + '"}' ;
+                        digest = createDigest("streams/stop", s );
+                        $http({
+                            url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
+                            "/client/streams/stop",
+                            data: s ,
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"}
+                        }).then(function (response) {
+                        });
+                        // Now the issue is that we need to hide it again if we start playing
+                        // So every time we do this, we can create a one-time listener for play events.
+                    });
+                    player.on('play', function () {
+                        player.bigPlayButton.hide();
+                        digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                            ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                            + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
+                        $http({
+                            url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
+                            "/client/channels/linear/getUrl",
+                            data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                            ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                            + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"}
+                        }).then(function (response) {
+
+                        });
+                    });
+
+
+                    digest = createDigest("ping", '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
                         '"locale":"fa-IR","sessionId":' + sessionID.toString() + '}');
                     $interval(function () {
                         $http({
