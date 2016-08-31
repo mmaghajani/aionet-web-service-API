@@ -6,7 +6,7 @@ var platformInformation = "";
 var login = "";
 var sessionID = "";
 var profiles = "";
-
+var promise;
 app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
 
     var digest = createDigest("getPlatformInformation", "111fa-IR");
@@ -44,8 +44,7 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
             .then(function (response) {
                 profiles = response.data;
                 $scope.profiles = profiles;
-
-                var profileGuid = ((profiles.profiles)[0]).guid
+                var profileGuid = ((profiles.profiles)[0]).guid;
                 digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
                     ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
                     + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
@@ -58,62 +57,71 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                     method: "POST",
                     headers: {"Content-Type": "application/json"}
                 }).then(function (response) {
-                    url = response.data;
-                    $scope.url = url;
                     var player = videojs('video');
+                    url = response.data;
+                    $scope.url = url.url;
+                    // player.src({"type": "application/x-mpegURL", "src": url.url, "withCredentials": "true"});
                     player.src({"type": "application/x-mpegURL", "src": url.url, "withCredentials": "true"});
                     player.play();
-
+                    //player.pause() ;
                     player.on('pause', function () {
-                        player.bigPlayButton.show();
+                        player.src({"type": "application/x-mpegURL", "src": '', "withCredentials": "true"});
                         var s = '{ "contentId": 8 , "type":"TV" , "locale":"fa-IR" ' +
-                            ', "profileGuid" : "' + profileGuid + '" , "sessionId" : "' + sessionID + '"}' ;
-                        digest = createDigest("streams/stop", s );
+                            ', "profileGuid" : "' + profileGuid + '" , "sessionId" : "' + sessionID + '"}';
+                        digest = createDigest("streams/stop", s);
                         $http({
                             url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
                             "/client/streams/stop",
-                            data: s ,
+                            data: s,
                             method: "POST",
                             headers: {"Content-Type": "application/json"}
                         }).then(function (response) {
+                            console.log("response ok pause");
+                            $interval.cancel(promise);
                         });
                         // Now the issue is that we need to hide it again if we start playing
                         // So every time we do this, we can create a one-time listener for play events.
                     });
                     player.on('play', function () {
-                        player.bigPlayButton.hide();
-                        digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
-                            ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
-                            + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
-                        $http({
-                            url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
-                            "/client/channels/linear/getUrl",
-                            data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
-                            ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
-                            + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"}
-                        }).then(function (response) {
-
-                        });
+                        var source = player.currentSrc();
+                        if (source == '') {
+                            digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                                ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                                + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
+                            $http({
+                                url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
+                                "/client/channels/linear/getUrl",
+                                data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                                ': ["HLS"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                                + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
+                                method: "POST",
+                                headers: {"Content-Type": "application/json"}
+                            }).then(function (response) {
+                                url = response.data;
+                                console.log("recognized");
+                                player.src({
+                                    "type": "application/x-mpegURL",
+                                    "src": url.url,
+                                    "withCredentials": "true"
+                                });
+                                player.play();
+                                console.log("response ok");
+                                digest = createDigest("ping", '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
+                                    '"locale":"fa-IR","sessionId":' + sessionID.toString() + '}');
+                                promise = $interval(function () {
+                                    $http({
+                                        url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
+                                        data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
+                                        + sessionID.toString() + '}',
+                                        method: "POST",
+                                        headers: {"Content-Type": "application/json"}
+                                    }).then(function (response) {
+                                        $scope.ping = response.data;
+                                    });
+                                }, platformInformation.pingRepeatFrom);
+                            });
+                        }
                     });
-
-
-                    digest = createDigest("ping", '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
-                        '"locale":"fa-IR","sessionId":' + sessionID.toString() + '}');
-                    $interval(function () {
-                        $http({
-                            url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
-                            data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
-                            + sessionID.toString() + '}',
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"}
-                        }).then(function (response) {
-                            $scope.ping = response.data;
-                        });
-                    }, platformInformation.pingRepeatTo);
-
-
                 });
             });
 
