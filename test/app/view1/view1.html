@@ -4,10 +4,15 @@
 <p>{{login.key}}</p>
 <p>{{((profiles.profiles)[0]).guid}}</p>
 <p>{{url.url}}</p>
+var myButton = video.controlBar.addChild('button', {
+text: "Press me",
+// other options
+});
 
+myButton.addClass("html-classname");
 <video id="video"
        class="video-js vjs-default-skin vjs-big-play-button"
-       data-setup='{"techOrder": ["html5"] , "controls": true, "autoplay": false, "preload": "auto"}'>
+       data-setup='{"techOrder": ["html5"] , "controls": true, "autoplay": false, "preload": "none"}'>
     <source
             src="http://walterebert.com/playground/video/hls/sintel-trailer.m3u8"
             type="application/x-mpegURL">
