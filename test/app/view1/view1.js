@@ -142,57 +142,57 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                     // });
                     function initVideoPlayer() {
 
-                        var counter = 0 ;
-                        var c = 0 ;
-                        var player = videojs('video') ;
+                        var counter = 0;
+                        var c = 0;
+                        var player = videojs('video');
                         // $scope.url = url.url;
                         player.src({"type": "application/x-mpegURL", "src": url.url, "withCredentials": "true"});
                         player.play();
                         //player.pause() ;
-                        player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.beforeRequest = function (options) {
-                            if (player.paused()) {
-                                console.log(options.uri);
-                                player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.cancel;
-                                // player.tech({ IWillNotUseThisInPlugins: true }).hls.xhr = '' ;
-                                console.log(options.uri);
-                                //options.xhr.abort();
-                                // options.url.replace(url.url, "");
-                                console.log("ist" + counter);
-                                counter = counter + 1;
-                                player.autoplay("false");
-                            }
-                            else {
-                                player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.resume;
-                                console.log("boro berim" + counter);
-                                counter = counter + 1;
-                                var source = player.currentSrc();
-                                if (source == '') {
-                                    digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
-                                        ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
-                                        + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
-                                    $http({
-                                        url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
-                                        "/client/channels/linear/getUrl",
-                                        data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
-                                        ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
-                                        + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
-                                        method: "POST",
-                                        headers: {"Content-Type": "application/json"}
-                                    }).then(function (response) {
-                                        url = response.data;
-                                        console.log("response ok from request");
-                                        player.src({
-                                            "type": "application/x-mpegURL",
-                                            "src": url.url,
-                                            "withCredentials": "true"
-                                        });
-                                    });
-
-                                }
-                            }
-                            console.log(options);
-                            return options;
-                        }
+                        // player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.beforeRequest = function (options) {
+                        //     if (player.paused()) {
+                        //         player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.cancel;
+                        //         // player.tech({ IWillNotUseThisInPlugins: true }).hls.xhr = '' ;
+                        //         //options.uri = '' ;
+                        //         // console.log(options.uri);
+                        //         //options.xhr.abort();
+                        //         // options.url.replace(url.url, "");
+                        //         console.log("ist" + counter);
+                        //         counter = counter + 1;
+                        //         player.autoplay("false");
+                        //     }
+                        //     else {
+                        //        // player.tech({IWillNotUseThisInPlugins: true}).hls.xhr.resume;
+                        //         console.log("boro berim" + counter);
+                        //         counter = counter + 1;
+                        //         var source = player.currentSrc();
+                        //         if (source == '') {
+                        //             digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                        //                 ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                        //                 + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
+                        //             $http({
+                        //                 url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
+                        //                 "/client/channels/linear/getUrl",
+                        //                 data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                        //                 ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                        //                 + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
+                        //                 method: "POST",
+                        //                 headers: {"Content-Type": "application/json"}
+                        //             }).then(function (response) {
+                        //                 url = response.data;
+                        //                 console.log("response ok from request");
+                        //                 player.src({
+                        //                     "type": "application/x-mpegURL",
+                        //                     "src": url.url,
+                        //                     "withCredentials": "true"
+                        //                 });
+                        //             });
+                        //
+                        //         }
+                        //     }
+                        //     console.log(options);
+                        //     return options;
+                        // }
 
                         player.on('pause', function () {
                             console.log("pause shodam");
@@ -207,13 +207,37 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                                 headers: {"Content-Type": "application/json"}
                             }).then(function (response) {
                                 $interval.cancel(promise);
-                                //player.src({"type": "application/x-mpegURL", "src": '', "withCredentials": "true"});
+                                player.src = '' ;
+                                player.load();
                                 console.log("response ok pause");
                             });
                         });
 
                         player.on('play', function () {
-                            if( c > 0 ) {
+                            // if( c > 0 ) {
+                            //     digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                            //         ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                            //         + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
+                            //     $http({
+                            //         url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest +
+                            //         "/client/channels/linear/getUrl",
+                            //         data: '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
+                            //         ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
+                            //         + profileGuid + '" , "sessionId" : "' + sessionID + '"}',
+                            //         method: "POST",
+                            //         headers: {"Content-Type": "application/json"}
+                            //     }).then(function (response) {
+                            //         var url = response.data;
+                            //         console.log("response ok");
+                            //         player = videojs('video') ;
+                            //         player.src({
+                            //             "type": "application/x-mpegURL",
+                            //             "src": url.url,
+                            //             "withCredentials": "true"
+                            //         });
+                            //     });
+                            // }
+                            if( player.src == '' ) {
                                 digest = createDigest("channels/linear/getUrl", '{ "channelType":"TV" , "playbackType":"LIVE" , "channelId": 8 , "locale":"fa-IR" , "protocols" ' +
                                     ': ["HLS_SECURE"] , "pictureTypes" : ["_2D"] , "audioFormats" : ["AAC"] , "delay" : 0 , "profileGuid" : "'
                                     + profileGuid + '" , "sessionId" : "' + sessionID + '"}');
@@ -227,29 +251,29 @@ app.controller('View1Ctrl', function ($scope, $http, md5, $interval) {
                                     headers: {"Content-Type": "application/json"}
                                 }).then(function (response) {
                                     var url = response.data;
-                                    console.log("response ok");
-                                    player = videojs('video') ;
-                                    player.src({
+                                    console.log("response ok from request");
+                                    player.src = {
                                         "type": "application/x-mpegURL",
                                         "src": url.url,
                                         "withCredentials": "true"
+                                    }
+                                });
+
+                                c = c + 1;
+                                digest = createDigest("ping", '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
+                                    '"locale":"fa-IR","sessionId":' + sessionID.toString() + '}');
+                                promise = $interval(function () {
+                                    $http({
+                                        url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
+                                        data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
+                                        + sessionID.toString() + '}',
+                                        method: "POST",
+                                        headers: {"Content-Type": "application/json"}
+                                    }).then(function (response) {
+                                        $scope.ping = response.data;
                                     });
-                                });
+                                }, platformInformation.pingRepeatFrom);
                             }
-                            c = c+1 ;
-                            digest = createDigest("ping", '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , ' +
-                                '"locale":"fa-IR","sessionId":' + sessionID.toString() + '}');
-                            promise = $interval(function () {
-                                $http({
-                                    url: "https://tv.aionet.ir/Catherine/api/5.4/json/7743461522282941752/" + digest + "/client/ping",
-                                    data: '{"contentId" : 8 , "type" : "TV" , "delay" : 0 , "locale":"fa-IR","sessionId":'
-                                    + sessionID.toString() + '}',
-                                    method: "POST",
-                                    headers: {"Content-Type": "application/json"}
-                                }).then(function (response) {
-                                    $scope.ping = response.data;
-                                });
-                            }, platformInformation.pingRepeatFrom);
                         });
                     }
                 });
